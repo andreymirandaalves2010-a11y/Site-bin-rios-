@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fase Secreta</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#03070a;color:#00ffff;font-family:Arial,sans-serif}
+body::before{content:"";position:fixed;width:500px;height:500px;background:#00ffff;filter:blur(180px);opacity:.12;animation:mover 7s infinite alternate ease-in-out}
+@keyframes mover{from{transform:translate(-200px,-100px)}to{transform:translate(200px,100px)}}
+.container{position:relative;z-index:2;width:90%;max-width:420px;padding:35px 25px;text-align:center;background:rgba(5,12,18,.94);border:1px solid #00ffff;border-radius:18px;box-shadow:0 0 25px #00ffff33;animation:entrada .8s ease}
+@keyframes entrada{from{opacity:0;transform:scale(.8) translateY(30px)}to{opacity:1;transform:scale(1) translateY(0)}}
+h1{font-size:30px;margin-bottom:10px;text-shadow:0 0 10px #00ffff}
+.subtitle{color:#8899a0;margin-bottom:25px}
+#tentativa{min-height:55px;display:flex;align-items:center;justify-content:center;margin-bottom:25px;padding:10px;background:#020609;border:1px solid #164b4b;border-radius:10px;font-size:25px;letter-spacing:6px;word-break:break-all}
+#tentativa:empty::before{content:"_ _ _ _ _";color:#24474a}
+.botoes{display:flex;justify-content:center;gap:18px}
+.botoes button{width:110px;height:60px;background:#071016;color:#00ffff;border:1px solid #00ffff;border-radius:10px;font-size:23px;font-weight:bold;cursor:pointer;transition:.2s}
+.botoes button:hover{background:#00ffff;color:#000;transform:translateY(-4px) scale(1.05);box-shadow:0 0 20px #00ffff}
+.botoes button:active{transform:scale(.9)}
+#msg{min-height:25px;margin:20px 0;color:white}
+#fase{display:none;margin-top:20px;padding:22px;border:1px solid #00ffff;border-radius:12px;background:#00ffff0d;animation:revelar .8s ease}
+@keyframes revelar{from{opacity:0;transform:scale(.5);filter:blur(10px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
+#fase h2{margin-bottom:10px;text-shadow:0 0 10px #00ffff}
+#fase p{color:#ddd;line-height:1.5}
+#reset{display:none;width:100%;margin-top:18px;padding:13px;background:transparent;color:#00ffff;border:1px solid #00ffff;border-radius:8px;font-size:17px;cursor:pointer}
+#reset:hover{background:#00ffff;color:#000;box-shadow:0 0 15px #00ffff}
+@media(max-width:400px){.container{padding:28px 18px}h1{font-size:25px}.botoes button{width:95px}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>FASE SECRETA</h1>
+<p class="subtitle">Digite a sequência correta</p>
+<div id="tentativa"></div>
+<div class="botoes">
+<button onclick="adicionar('0')">0</button>
+<button onclick="adicionar('1')">1</button>
+</div>
+<div id="msg"></div>
+<div id="fase">
+<h2>✓ ACESSO LIBERADO</h2>
+<p>Você desbloqueou a próxima fase!</p>
+</div>
+<button id="reset" onclick="resetar()">RESET</button>
+</div>
+<script>
+const senha="10110";
+let tentativa="";
+
+function adicionar(numero){
+    if(tentativa.length>=50)return;
+    tentativa+=numero;
+    document.getElementById("tentativa").textContent=tentativa;
+    verificar();
+}
+
+document.addEventListener("keydown",function(event){
+    if(event.key==="0"||event.key==="1") adicionar(event.key);
+    if(event.key==="Backspace"){
+        tentativa=tentativa.slice(0,-1);
+        document.getElementById("tentativa").textContent=tentativa;
+    }
+    if(event.key==="Enter") resetar();
+});
+
+function verificar(){
+    if(tentativa.length===senha.length){
+        if(tentativa===senha){
+            document.getElementById("msg").textContent="Senha correta!";
+            document.getElementById("fase").style.display="block";
+        }else{
+            document.getElementById("msg").textContent="Senha incorreta!";
+            document.getElementById("reset").style.display="block";
+        }
+    }
+}
+
+function resetar(){
+    tentativa="";
+    document.getElementById("tentativa").textContent="";
+    document.getElementById("msg").textContent="";
+    document.getElementById("fase").style.display="none";
+    document.getElementById("reset").style.display="none";
+}
+</script>
+</body>
+</html>
