@@ -1,1160 +1,461 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Fase Secreta - descubra a sequência correta.">
+<meta name="theme-color" content="#050a0f">
+<title>Fase Secreta</title>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    >
+<style>
+    *{margin:0;padding:0;box-sizing:border-box}
 
-    <meta
-        name="description"
-        content="Fase Secreta - descubra a sequência correta."
-    >
+    :root{
+        --bg:#03070b;
+        --cyan:#00f5ff;
+        --text:#f2fbfc;
+        --muted:#8ca3aa;
+        --danger:#ff4d67;
+        --success:#45ff9a;
+        --border:rgba(0,245,255,.28);
+        --radius:22px;
+    }
 
-    <meta name="theme-color" content="#050a0f">
+    body{
+        min-height:100vh;
+        min-height:100svh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:20px;
+        overflow-x:hidden;
+        background:
+            radial-gradient(circle at 15% 20%,rgba(0,245,255,.09),transparent 30%),
+            radial-gradient(circle at 85% 80%,rgba(0,180,220,.07),transparent 30%),
+            var(--bg);
+        color:var(--text);
+        font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+    }
 
-    <title>Fase Secreta</title>
+    /* FUNDO */
+    .background{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+    .background::before,.background::after{
+        content:"";position:absolute;width:420px;height:420px;border-radius:50%;
+        background:var(--cyan);filter:blur(150px);opacity:.07;
+        animation:float 9s ease-in-out infinite alternate;
+    }
+    .background::before{top:-180px;left:-160px}
+    .background::after{right:-180px;bottom:-180px;animation-delay:-4s}
+    .grid{
+        position:absolute;inset:0;
+        background-image:
+            linear-gradient(rgba(0,245,255,.025) 1px,transparent 1px),
+            linear-gradient(90deg,rgba(0,245,255,.025) 1px,transparent 1px);
+        background-size:45px 45px;
+        mask-image:linear-gradient(to bottom,black,transparent 90%);
+        -webkit-mask-image:linear-gradient(to bottom,black,transparent 90%);
+    }
+    @keyframes float{
+        from{transform:translate(0,0) scale(1)}
+        to{transform:translate(90px,60px) scale(1.15)}
+    }
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    /* CARD */
+    .container{
+        position:relative;z-index:2;
+        width:min(100%,470px);
+        padding:38px;
+        text-align:center;
+        background:linear-gradient(145deg,rgba(11,24,31,.96),rgba(4,10,15,.98));
+        border:1px solid var(--border);
+        border-radius:var(--radius);
+        box-shadow:0 25px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.04),0 0 50px rgba(0,245,255,.05);
+        backdrop-filter:blur(18px);
+        -webkit-backdrop-filter:blur(18px);
+        animation:entrance .7s ease both;
+    }
+    .container::before{
+        content:"";position:absolute;top:0;left:12%;right:12%;height:1px;
+        background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+        box-shadow:0 0 18px var(--cyan);
+    }
+    .container.unlocked{
+        border-color:rgba(69,255,154,.5);
+        box-shadow:0 25px 80px rgba(0,0,0,.55),0 0 60px rgba(69,255,154,.12);
+    }
+    @keyframes entrance{
+        from{opacity:0;transform:translateY(25px) scale(.96)}
+        to{opacity:1;transform:translateY(0) scale(1)}
+    }
+
+    /* CABEÇALHO */
+    .badge{
+        display:inline-flex;align-items:center;gap:8px;
+        margin-bottom:16px;padding:7px 12px;
+        border:1px solid rgba(0,245,255,.2);border-radius:999px;
+        background:rgba(0,245,255,.06);color:var(--cyan);
+        font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;
+    }
+    .status-dot{
+        width:7px;height:7px;border-radius:50%;
+        background:var(--cyan);box-shadow:0 0 10px var(--cyan);
+        animation:pulse 1.8s infinite;
+    }
+    .unlocked .badge{color:var(--success);border-color:rgba(69,255,154,.3);background:rgba(69,255,154,.06)}
+    .unlocked .status-dot{background:var(--success);box-shadow:0 0 10px var(--success)}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+    h1{
+        margin-bottom:10px;
+        font-size:clamp(28px,7vw,38px);font-weight:800;letter-spacing:-1px;
+        text-shadow:0 0 25px rgba(0,245,255,.2);
+    }
+    h1 span{color:var(--cyan);text-shadow:0 0 15px rgba(0,245,255,.65)}
+
+    .subtitle{
+        max-width:340px;margin:0 auto 28px;
+        color:var(--muted);font-size:15px;line-height:1.6;
+    }
+
+    /* CONTADOR */
+    .counter{
+        display:flex;justify-content:space-between;align-items:center;
+        margin-bottom:8px;color:#60777e;
+        font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+    }
+    #contador{color:var(--cyan);font-family:monospace;font-size:12px}
+
+    /* BARRA DE PROGRESSO */
+    .progress{
+        height:3px;margin-bottom:12px;border-radius:3px;
+        background:rgba(0,245,255,.1);overflow:hidden;
+    }
+    #barra{
+        height:100%;width:0;
+        background:linear-gradient(90deg,var(--cyan),#5affff);
+        box-shadow:0 0 10px var(--cyan);
+        transition:width .2s ease,background .25s ease;
+    }
+    #barra.erro{background:var(--danger);box-shadow:0 0 10px var(--danger)}
+    #barra.ok{background:var(--success);box-shadow:0 0 10px var(--success)}
+
+    /* SEQUÊNCIA */
+    #tentativa{
+        width:100%;min-height:82px;
+        display:flex;align-items:center;justify-content:center;
+        margin-bottom:22px;padding:14px;
+        background:linear-gradient(145deg,rgba(0,0,0,.45),rgba(0,245,255,.025));
+        border:1px solid rgba(0,245,255,.18);border-radius:14px;
+        color:var(--cyan);
+        font-family:"Courier New",monospace;
+        font-size:clamp(15px,4vw,25px);font-weight:700;
+        letter-spacing:clamp(1px,.8vw,4px);
+        overflow-wrap:anywhere;word-break:break-all;
+        transition:border-color .25s ease,box-shadow .25s ease,color .25s ease;
+    }
+    #tentativa:empty::before{
+        content:"_ _ _ _ _ _ _ _ _ _";
+        color:rgba(0,245,255,.15);letter-spacing:3px;
+    }
+    #tentativa.erro{
+        color:var(--danger);border-color:rgba(255,77,103,.5);
+        box-shadow:0 0 25px rgba(255,77,103,.15);
+        animation:shake .4s ease;
+    }
+    #tentativa.ok{
+        color:var(--success);border-color:rgba(69,255,154,.5);
+        box-shadow:0 0 25px rgba(69,255,154,.15);
+    }
+    @keyframes shake{
+        0%,100%{transform:translateX(0)}
+        20%,60%{transform:translateX(-8px)}
+        40%,80%{transform:translateX(8px)}
+    }
+
+    /* BOTÕES */
+    .botoes{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;width:100%}
+
+    .botoes button,#reset{
+        min-height:62px;
+        border:1px solid rgba(0,245,255,.4);border-radius:14px;
+        background:linear-gradient(145deg,rgba(9,25,32,.95),rgba(4,12,17,.95));
+        color:var(--cyan);
+        font-family:inherit;font-size:23px;font-weight:800;
+        cursor:pointer;
+        transition:transform .25s ease,background .25s ease,box-shadow .25s ease,border-color .25s ease,opacity .25s ease;
+        -webkit-tap-highlight-color:transparent;
+    }
+    .botoes button:hover:not(:disabled),#reset:hover{
+        background:var(--cyan);color:#001013;border-color:var(--cyan);
+        transform:translateY(-3px);
+        box-shadow:0 10px 30px rgba(0,245,255,.18),0 0 25px rgba(0,245,255,.18);
+    }
+    .botoes button:active:not(:disabled),#reset:active{transform:translateY(0) scale(.97)}
+    .botoes button:disabled{opacity:.35;cursor:not-allowed}
+    button:focus-visible{outline:3px solid rgba(255,255,255,.9);outline-offset:3px}
+
+    /* MENSAGEM */
+    #msg{
+        min-height:25px;margin-top:20px;
+        color:#d8e4e7;font-size:14px;font-weight:600;
+        transition:color .25s ease;
+    }
+
+    /* FASE DESBLOQUEADA */
+    #fase{
+        display:none;margin-top:20px;padding:24px 20px;
+        background:linear-gradient(145deg,rgba(69,255,154,.08),rgba(0,245,255,.04));
+        border:1px solid rgba(69,255,154,.4);border-radius:16px;
+        animation:reveal .65s ease both;
+    }
+    #fase.visivel{display:block}
+    #fase h2{
+        margin-bottom:8px;color:var(--success);
+        font-size:clamp(19px,5vw,23px);
+        text-shadow:0 0 15px rgba(69,255,154,.35);
+    }
+    #fase p{color:#c7d5d8;font-size:14px;line-height:1.6}
+    @keyframes reveal{
+        from{opacity:0;transform:translateY(15px) scale(.97)}
+        to{opacity:1;transform:translateY(0) scale(1)}
+    }
+
+    /* RESET */
+    #reset{
+        display:none;width:100%;margin-top:14px;padding:0 18px;
+        min-height:52px;font-size:14px;letter-spacing:1px;
+    }
+    #reset.visivel{display:block}
+
+    /* DICA */
+    .hint{margin-top:24px;color:#52686e;font-size:11px;line-height:1.8}
+    .hint kbd{
+        display:inline-block;margin:0 2px;padding:2px 6px;
+        border:1px solid rgba(255,255,255,.1);border-radius:5px;
+        background:rgba(255,255,255,.04);color:#81979d;font-family:monospace;
+    }
+
+    /* RESPONSIVIDADE */
+    @media (max-width:600px){
+        body{padding:14px}
+        .container{padding:30px 20px;border-radius:19px}
+        .subtitle{font-size:14px;margin-bottom:24px}
+        #tentativa{min-height:72px;margin-bottom:18px}
+        .botoes{gap:10px}
+        .botoes button{min-height:58px;font-size:21px}
+    }
+    @media (max-width:400px){
+        .container{padding:25px 15px}
+        h1{font-size:27px}
+        .badge{font-size:9px;letter-spacing:1.2px}
+        #tentativa{min-height:68px;font-size:13px;letter-spacing:1px}
+        .hint{font-size:10px}
+    }
+    @media (max-width:320px){
+        body{padding:8px}
+        .container{padding:22px 12px}
+        .botoes button{min-height:54px}
+        #tentativa{font-size:12px}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+        *,*::before,*::after{
+            animation-duration:.01ms !important;
+            animation-iteration-count:1 !important;
+            transition-duration:.01ms !important;
         }
-
-        :root {
-            --bg: #03070b;
-            --card: rgba(7, 16, 22, 0.92);
-
-            --cyan: #00f5ff;
-            --cyan-dark: #00aebb;
-
-            --text: #f2fbfc;
-            --muted: #8ca3aa;
-
-            --danger: #ff4d67;
-            --success: #45ff9a;
-
-            --border: rgba(0, 245, 255, 0.28);
-
-            --radius: 22px;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            min-height: 100vh;
-            min-height: 100svh;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            padding: 20px;
-
-            overflow-x: hidden;
-
-            background:
-                radial-gradient(
-                    circle at 15% 20%,
-                    rgba(0, 245, 255, 0.09),
-                    transparent 30%
-                ),
-                radial-gradient(
-                    circle at 85% 80%,
-                    rgba(0, 180, 220, 0.07),
-                    transparent 30%
-                ),
-                var(--bg);
-
-            color: var(--text);
-
-            font-family:
-                Inter,
-                system-ui,
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                Arial,
-                sans-serif;
-        }
-
-        /* =========================
-           FUNDO
-        ========================= */
-
-        .background {
-            position: fixed;
-            inset: 0;
-
-            pointer-events: none;
-            overflow: hidden;
-
-            z-index: 0;
-        }
-
-        .background::before,
-        .background::after {
-            content: "";
-
-            position: absolute;
-
-            width: 420px;
-            height: 420px;
-
-            border-radius: 50%;
-
-            background: var(--cyan);
-
-            filter: blur(150px);
-
-            opacity: 0.07;
-
-            animation: float 9s ease-in-out infinite alternate;
-        }
-
-        .background::before {
-            top: -180px;
-            left: -160px;
-        }
-
-        .background::after {
-            right: -180px;
-            bottom: -180px;
-
-            animation-delay: -4s;
-        }
-
-        .grid {
-            position: absolute;
-            inset: 0;
-
-            background-image:
-                linear-gradient(
-                    rgba(0, 245, 255, 0.025) 1px,
-                    transparent 1px
-                ),
-                linear-gradient(
-                    90deg,
-                    rgba(0, 245, 255, 0.025) 1px,
-                    transparent 1px
-                );
-
-            background-size: 45px 45px;
-
-            mask-image: linear-gradient(
-                to bottom,
-                black,
-                transparent 90%
-            );
-        }
-
-        @keyframes float {
-            from {
-                transform: translate(0, 0) scale(1);
-            }
-
-            to {
-                transform: translate(90px, 60px) scale(1.15);
-            }
-        }
-
-        /* =========================
-           CARD
-        ========================= */
-
-        .container {
-            position: relative;
-            z-index: 2;
-
-            width: min(100%, 470px);
-
-            padding: 38px;
-
-            text-align: center;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(11, 24, 31, 0.96),
-                    rgba(4, 10, 15, 0.98)
-                );
-
-            border: 1px solid var(--border);
-
-            border-radius: var(--radius);
-
-            box-shadow:
-                0 25px 80px rgba(0, 0, 0, 0.55),
-                inset 0 1px 0 rgba(255, 255, 255, 0.04),
-                0 0 50px rgba(0, 245, 255, 0.05);
-
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-
-            animation: entrance 0.7s ease both;
-        }
-
-        .container::before {
-            content: "";
-
-            position: absolute;
-
-            top: 0;
-            left: 12%;
-            right: 12%;
-
-            height: 1px;
-
-            background: linear-gradient(
-                90deg,
-                transparent,
-                var(--cyan),
-                transparent
-            );
-
-            box-shadow: 0 0 18px var(--cyan);
-        }
-
-        @keyframes entrance {
-            from {
-                opacity: 0;
-                transform: translateY(25px) scale(0.96);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        /* =========================
-           CABEÇALHO
-        ========================= */
-
-        .badge {
-            display: inline-flex;
-
-            align-items: center;
-            gap: 8px;
-
-            margin-bottom: 16px;
-            padding: 7px 12px;
-
-            border: 1px solid rgba(0, 245, 255, 0.2);
-
-            border-radius: 999px;
-
-            background: rgba(0, 245, 255, 0.06);
-
-            color: var(--cyan);
-
-            font-size: 11px;
-            font-weight: 700;
-
-            letter-spacing: 1.8px;
-            text-transform: uppercase;
-        }
-
-        .status-dot {
-            width: 7px;
-            height: 7px;
-
-            border-radius: 50%;
-
-            background: var(--cyan);
-
-            box-shadow: 0 0 10px var(--cyan);
-
-            animation: pulse 1.8s infinite;
-        }
-
-        @keyframes pulse {
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.35;
-            }
-        }
-
-        h1 {
-            margin-bottom: 10px;
-
-            color: var(--text);
-
-            font-size: clamp(28px, 7vw, 38px);
-            font-weight: 800;
-
-            letter-spacing: -1px;
-
-            text-shadow:
-                0 0 25px rgba(0, 245, 255, 0.2);
-        }
-
-        h1 span {
-            color: var(--cyan);
-
-            text-shadow:
-                0 0 15px rgba(0, 245, 255, 0.65);
-        }
-
-        .subtitle {
-            max-width: 340px;
-
-            margin: 0 auto 28px;
-
-            color: var(--muted);
-
-            font-size: 15px;
-            line-height: 1.6;
-        }
-
-        /* =========================
-           CONTADOR
-        ========================= */
-
-        .counter {
-            display: flex;
-
-            justify-content: space-between;
-            align-items: center;
-
-            margin-bottom: 8px;
-
-            color: #60777e;
-
-            font-size: 11px;
-            font-weight: 700;
-
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        #contador {
-            color: var(--cyan);
-
-            font-family: monospace;
-
-            font-size: 12px;
-        }
-
-        /* =========================
-           SEQUÊNCIA
-        ========================= */
-
-        #tentativa {
-            width: 100%;
-            min-height: 82px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            margin-bottom: 22px;
-            padding: 14px;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(0, 0, 0, 0.45),
-                    rgba(0, 245, 255, 0.025)
-                );
-
-            border: 1px solid rgba(0, 245, 255, 0.18);
-
-            border-radius: 14px;
-
-            color: var(--cyan);
-
-            font-family: "Courier New", monospace;
-
-            /*
-             * Permite que até 30 caracteres
-             * sejam exibidos sem quebrar o layout.
-             */
-            font-size: clamp(15px, 4vw, 25px);
-
-            font-weight: 700;
-
-            letter-spacing: clamp(1px, 0.8vw, 4px);
-
-            overflow-wrap: anywhere;
-
-            word-break: break-all;
-
-            transition:
-                border-color 0.25s ease,
-                box-shadow 0.25s ease;
-        }
-
-        #tentativa:empty::before {
-            content: "_ _ _ _ _ _ _ _ _ _";
-
-            color: rgba(0, 245, 255, 0.15);
-
-            letter-spacing: 3px;
-        }
-
-        /* =========================
-           BOTÕES
-        ========================= */
-
-        .botoes {
-            display: grid;
-
-            grid-template-columns: repeat(2, 1fr);
-
-            gap: 14px;
-
-            width: 100%;
-        }
-
-        .botoes button,
-        #reset {
-            min-height: 62px;
-
-            border: 1px solid rgba(0, 245, 255, 0.4);
-
-            border-radius: 14px;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(9, 25, 32, 0.95),
-                    rgba(4, 12, 17, 0.95)
-                );
-
-            color: var(--cyan);
-
-            font-family: inherit;
-
-            font-size: 23px;
-            font-weight: 800;
-
-            cursor: pointer;
-
-            transition:
-                transform 0.25s ease,
-                background 0.25s ease,
-                box-shadow 0.25s ease,
-                border-color 0.25s ease;
-        }
-
-        .botoes button:hover,
-        #reset:hover {
-            background: var(--cyan);
-
-            color: #001013;
-
-            border-color: var(--cyan);
-
-            transform: translateY(-3px);
-
-            box-shadow:
-                0 10px 30px rgba(0, 245, 255, 0.18),
-                0 0 25px rgba(0, 245, 255, 0.18);
-        }
-
-        .botoes button:active,
-        #reset:active {
-            transform: translateY(0) scale(0.97);
-        }
-
-        button:focus-visible {
-            outline: 3px solid rgba(255, 255, 255, 0.9);
-
-            outline-offset: 3px;
-        }
-
-        /* =========================
-           MENSAGEM
-        ========================= */
-
-        #msg {
-            min-height: 25px;
-
-            margin: 20px 0 0;
-
-            color: #d8e4e7;
-
-            font-size: 14px;
-            font-weight: 600;
-
-            transition: 0.25s ease;
-        }
-
-        /* =========================
-           FASE DESBLOQUEADA
-        ========================= */
-
-        #fase {
-            display: none;
-
-            margin-top: 20px;
-            padding: 24px 20px;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(69, 255, 154, 0.08),
-                    rgba(0, 245, 255, 0.04)
-                );
-
-            border: 1px solid rgba(69, 255, 154, 0.4);
-
-            border-radius: 16px;
-
-            animation: reveal 0.65s ease both;
-        }
-
-        #fase h2 {
-            margin-bottom: 8px;
-
-            color: var(--success);
-
-            font-size: clamp(19px, 5vw, 23px);
-
-            text-shadow:
-                0 0 15px rgba(69, 255, 154, 0.35);
-        }
-
-        #fase p {
-            color: #c7d5d8;
-
-            font-size: 14px;
-
-            line-height: 1.6;
-        }
-
-        @keyframes reveal {
-            from {
-                opacity: 0;
-
-                transform:
-                    translateY(15px)
-                    scale(0.97);
-            }
-
-            to {
-                opacity: 1;
-
-                transform:
-                    translateY(0)
-                    scale(1);
-            }
-        }
-
-        /* =========================
-           RESET
-        ========================= */
-
-        #reset {
-            display: none;
-
-            width: 100%;
-
-            margin-top: 14px;
-            padding: 0 18px;
-
-            min-height: 52px;
-
-            font-size: 14px;
-
-            letter-spacing: 1px;
-        }
-
-        /* =========================
-           DICA
-        ========================= */
-
-        .hint {
-            margin-top: 24px;
-
-            color: #52686e;
-
-            font-size: 11px;
-
-            line-height: 1.5;
-        }
-
-        .hint kbd {
-            display: inline-block;
-
-            margin: 0 2px;
-            padding: 2px 6px;
-
-            border: 1px solid rgba(255, 255, 255, 0.1);
-
-            border-radius: 5px;
-
-            background: rgba(255, 255, 255, 0.04);
-
-            color: #81979d;
-
-            font-family: monospace;
-        }
-
-        /* =========================
-           RESPONSIVIDADE
-        ========================= */
-
-        @media (max-width: 600px) {
-
-            body {
-                padding: 14px;
-            }
-
-            .container {
-                padding: 30px 20px;
-
-                border-radius: 19px;
-            }
-
-            .subtitle {
-                font-size: 14px;
-
-                margin-bottom: 24px;
-            }
-
-            #tentativa {
-                min-height: 72px;
-
-                margin-bottom: 18px;
-            }
-
-            .botoes {
-                gap: 10px;
-            }
-
-            .botoes button {
-                min-height: 58px;
-
-                font-size: 21px;
-            }
-        }
-
-        @media (max-width: 400px) {
-
-            .container {
-                padding: 25px 15px;
-            }
-
-            h1 {
-                font-size: 27px;
-            }
-
-            .badge {
-                font-size: 9px;
-
-                letter-spacing: 1.2px;
-            }
-
-            #tentativa {
-                min-height: 68px;
-
-                font-size: 13px;
-
-                letter-spacing: 1px;
-            }
-
-            .hint {
-                font-size: 10px;
-            }
-        }
-
-        @media (max-width: 320px) {
-
-            body {
-                padding: 8px;
-            }
-
-            .container {
-                padding: 22px 12px;
-            }
-
-            .botoes button {
-                min-height: 54px;
-            }
-
-            #tentativa {
-                font-size: 12px;
-            }
-        }
-
-        /* =========================
-           REDUÇÃO DE MOVIMENTO
-        ========================= */
-
-        @media (prefers-reduced-motion: reduce) {
-
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-
-                animation-iteration-count: 1 !important;
-
-                transition-duration: 0.01ms !important;
-
-                scroll-behavior: auto !important;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
 
 <body>
 
-    <div
-        class="background"
-        aria-hidden="true"
-    >
-        <div class="grid"></div>
+<div class="background" aria-hidden="true"><div class="grid"></div></div>
+
+<main class="container" id="card">
+
+    <div class="badge">
+        <span class="status-dot"></span>
+        <span id="badgeTexto">Sistema protegido</span>
     </div>
 
+    <h1>FASE <span>SECRETA</span></h1>
 
-    <main class="container">
+    <p class="subtitle">
+        Digite a sequência correta para desbloquear a próxima fase.
+    </p>
 
-        <div class="badge">
-            <span class="status-dot"></span>
+    <div class="counter">
+        <span>Sequência</span>
+        <span id="contador">0 / 20</span>
+    </div>
 
-            Sistema protegido
-        </div>
+    <div class="progress" aria-hidden="true"><div id="barra"></div></div>
 
+    <div id="tentativa" aria-live="polite" aria-label="Sequência digitada"></div>
 
-        <h1>
-            FASE <span>SECRETA</span>
-        </h1>
+    <div class="botoes">
+        <button type="button" id="btn0" data-valor="0" aria-label="Adicionar zero">0</button>
+        <button type="button" id="btn1" data-valor="1" aria-label="Adicionar um">1</button>
+    </div>
 
+    <div id="msg" role="status" aria-live="polite"></div>
 
-        <p class="subtitle">
-            Digite a sequência correta para desbloquear
-            a próxima fase.
-        </p>
+    <section id="fase" aria-live="polite">
+        <h2>✓ ACESSO LIBERADO</h2>
+        <p>A definir FRASE</p>
+    </section>
 
+    <button id="reset" type="button">RESETAR SEQUÊNCIA</button>
 
-        <div class="counter">
+    <p class="hint">
+        Você também pode usar o teclado:
+        <kbd>0</kbd> <kbd>1</kbd> para digitar,
+        <kbd>Backspace</kbd> para apagar e
+        <kbd>Esc</kbd> para resetar.
+    </p>
 
-            <span>
-                Sequência
-            </span>
+</main>
 
-            <span id="contador">
-                0 / 30
-            </span>
+<script>
+(function () {
+    "use strict";
 
-        </div>
+    /* CONFIGURAÇÃO */
+    const SENHA = "01000001010001010001"; // SENHA SECRETA
+    const LIMITE = SENHA.length;          // limite acompanha o tamanho da senha
 
+    /* ESTADO */
+    let tentativa = "";
+    let bloqueado = false; // true após acerto ou erro, até apagar/resetar
 
-        <div
-            id="tentativa"
-            aria-live="polite"
-            aria-label="Sequência digitada"
-        ></div>
+    /* ELEMENTOS */
+    const $ = (id) => document.getElementById(id);
+    const card = $("card");
+    const tentativaEl = $("tentativa");
+    const mensagemEl = $("msg");
+    const faseEl = $("fase");
+    const resetEl = $("reset");
+    const contadorEl = $("contador");
+    const barraEl = $("barra");
+    const badgeEl = $("badgeTexto");
+    const botoes = [$("btn0"), $("btn1")];
 
+    /* UTILIDADES */
+    function mensagem(texto, cor) {
+        mensagemEl.textContent = texto;
+        mensagemEl.style.color = cor || "";
+    }
 
-        <div class="botoes">
-
-            <button
-                type="button"
-                onclick="adicionar('0')"
-                aria-label="Adicionar zero"
-            >
-                0
-            </button>
-
-
-            <button
-                type="button"
-                onclick="adicionar('1')"
-                aria-label="Adicionar um"
-            >
-                1
-            </button>
-
-        </div>
-
-
-        <div
-            id="msg"
-            role="status"
-            aria-live="polite"
-        ></div>
-
-
-        <section
-            id="fase"
-            aria-live="polite"
-        >
-
-            <h2>
-                ✓ ACESSO LIBERADO
-            </h2>
-
-            <p>
-                Você desbloqueou a próxima fase!
-            </p>
-
-        </section>
-
-
-        <button
-            id="reset"
-            type="button"
-            onclick="resetar()"
-        >
-            RESETAR SEQUÊNCIA
-        </button>
-
-
-        <p class="hint">
-
-            Você também pode usar o teclado:
-
-            <kbd>0</kbd>
-            <kbd>1</kbd>
-
-            para digitar,
-
-            <kbd>Backspace</kbd>
-            para apagar e
-
-            <kbd>Esc</kbd>
-            para resetar.
-
-        </p>
-
-    </main>
-
-
-    <script>
-
-        /* =========================
-           CONFIGURAÇÃO
-        ========================= */
-
-        const senha = "00110110100110101110"; //SENHA SECRETA
-
-        const LIMITE = 30; //LIMITE DE CARACTERES
-
-
-        /* =========================
-           ESTADO
-        ========================= */
-
-        let tentativa = "";
-
-
-        /* =========================
-           ELEMENTOS
-        ========================= */
-
-        const tentativaElement =
-            document.getElementById("tentativa");
-
-        const mensagemElement =
-            document.getElementById("msg");
-
-        const faseElement =
-            document.getElementById("fase");
-
-        const resetElement =
-            document.getElementById("reset");
-
-        const contadorElement =
-            document.getElementById("contador");
-
-
-        /* =========================
-           ATUALIZAR TELA
-        ========================= */
-
-        function atualizarTela() {
-
-            tentativaElement.textContent =
-                tentativa;
-
-            contadorElement.textContent =
-                `${tentativa.length} / ${LIMITE}`;
-
+    function estado(tipo) {
+        // tipo: "erro" | "ok" | ""
+        tentativaEl.classList.remove("erro", "ok");
+        barraEl.classList.remove("erro", "ok");
+        if (tipo) {
+            // força reinício da animação de shake
+            void tentativaEl.offsetWidth;
+            tentativaEl.classList.add(tipo);
+            barraEl.classList.add(tipo);
         }
-
-
-        /* =========================
-           ADICIONAR 0 OU 1
-        ========================= */
-
-        function adicionar(numero) {
-
-            /*
-             * Impede ultrapassar 30 caracteres.
-             */
-
-            if (tentativa.length >= LIMITE) {
-
-                mensagemElement.textContent =
-                    "Limite máximo de 30 caracteres atingido.";
-
-                mensagemElement.style.color =
-                    "#ff4d67";
-
-                resetElement.style.display =
-                    "block";
-
-                return;
-            }
-
-
-            /*
-             * Aceita somente 0 e 1.
-             */
-
-            if (numero !== "0" && numero !== "1") {
-                return;
-            }
-
-
-            tentativa += numero;
-
-
-            atualizarTela();
-
-
-            /*
-             * Limpa mensagem anterior.
-             */
-
-            mensagemElement.textContent = "";
-
-            mensagemElement.style.color = "";
-
-
-            verificar();
-
-        }
-
-
-        /* =========================
-           APAGAR
-        ========================= */
-
-        function apagar() {
-
-            if (tentativa.length === 0) {
-                return;
-            }
-
-
-            tentativa =
-                tentativa.slice(0, -1);
-
-
-            atualizarTela();
-
-
-            mensagemElement.textContent = "";
-
-            mensagemElement.style.color = "";
-
-
-            faseElement.style.display =
-                "none";
-
-
-            resetElement.style.display =
-                "none";
-
-        }
-
-
-        /* =========================
-           VERIFICAR SENHA
-        ========================= */
-
-        function verificar() {
-
-            /*
-             * Só verifica quando tiver
-             * exatamente o mesmo tamanho
-             * da senha.
-             */
-
-            if (tentativa.length !== senha.length) {
-
-                /*
-                 * Se chegou ao limite de 30
-                 * sem acertar, informa erro.
-                 */
-
-                if (tentativa.length >= LIMITE) {
-
-                    mensagemElement.textContent =
-                        "Sequência incorreta.";
-
-                    mensagemElement.style.color =
-                        "#ff4d67";
-
-                    resetElement.style.display =
-                        "block";
-                }
-
-                return;
-            }
-
-
-            /*
-             * SENHA CORRETA
-             */
-
-            if (tentativa === senha) {
-
-                mensagemElement.textContent =
-                    "Senha correta!", alert("Parabéns! Você desbloqueou a próxima fase."),
-                    alert("Vocês superaram 70% dos brasileiros com esse exercício!"),
-
-                mensagemElement.style.color =
-                    "#45ff9a";
-
-
-                faseElement.style.display =
-                    "block";
-
-
-                resetElement.style.display =
-                    "block";
-
-
-                return;
-            }
-
-
-            /*
-             * SENHA INCORRETA
-             */
-
-            mensagemElement.textContent =
-                "Senha incorreta. Tente novamente.";
-
-            mensagemElement.style.color =
-                "#ff4d67";
-
-
-            resetElement.style.display =
-                "block";
-
-        }
-
-
-        /* =========================
-           RESET
-        ========================= */
-
-        function resetar() {
-
-            tentativa = "";
-
-
-            atualizarTela();
-
-
-            mensagemElement.textContent = "";
-
-            mensagemElement.style.color = "";
-
-
-            faseElement.style.display =
-                "none";
-
-
-            resetElement.style.display =
-                "none";
-
-        }
-
-
-        /* =========================
-           TECLADO
-        ========================= */
-
-        document.addEventListener(
-            "keydown",
-            function (event) {
-
-                /*
-                 * Tecla 0
-                 */
-
-                if (event.key === "0") {
-
-                    event.preventDefault();
-
-                    adicionar("0");
-
-                    return;
-                }
-
-
-                /*
-                 * Tecla 1
-                 */
-
-                if (event.key === "1") {
-
-                    event.preventDefault();
-
-                    adicionar("1");
-
-                    return;
-                }
-
-
-                /*
-                 * Backspace
-                 */
-
-                if (event.key === "Backspace") {
-
-                    event.preventDefault();
-
-                    apagar();
-
-                    return;
-                }
-
-
-                /*
-                 * Escape
-                 */
-
-                if (event.key === "Escape") {
-
-                    event.preventDefault();
-
-                    resetar();
-
-                }
-
-            }
-        );
-
-
-        /*
-         * Inicializa contador.
-         */
-
+    }
+
+    function travarBotoes(travar) {
+        botoes.forEach((b) => (b.disabled = travar));
+    }
+
+    function atualizarTela() {
+        tentativaEl.textContent = tentativa;
+        contadorEl.textContent = `${tentativa.length} / ${LIMITE}`;
+        barraEl.style.width = `${(tentativa.length / LIMITE) * 100}%`;
+    }
+
+    function limparFeedback() {
+        mensagem("");
+        estado("");
+        faseEl.classList.remove("visivel");
+        resetEl.classList.remove("visivel");
+        card.classList.remove("unlocked");
+        badgeEl.textContent = "Sistema protegido";
+    }
+
+    /* AÇÕES */
+    function adicionar(valor) {
+        if (bloqueado) return;
+        if (valor !== "0" && valor !== "1") return;
+        if (tentativa.length >= LIMITE) return;
+
+        tentativa += valor;
         atualizarTela();
+        mensagem("");
+        estado("");
 
-    </script>
+        if (tentativa.length === LIMITE) verificar();
+    }
+
+    function apagar() {
+        if (tentativa.length === 0) return;
+
+        // após acerto, a sequência fica travada: só o reset libera
+        if (bloqueado && tentativa === SENHA) return;
+
+        tentativa = tentativa.slice(0, -1);
+        bloqueado = false;
+        travarBotoes(false);
+        atualizarTela();
+        limparFeedback();
+    }
+
+    function verificar() {
+        bloqueado = true;
+        resetEl.classList.add("visivel");
+
+        if (tentativa === SENHA) {
+            estado("ok");
+            mensagem("Senha correta!", "var(--success)");
+            faseEl.classList.add("visivel");
+            card.classList.add("unlocked");
+            badgeEl.textContent = "Sistema liberado";
+            travarBotoes(true);
+            return;
+        }
+
+        estado("erro");
+        mensagem("Senha incorreta. Tente novamente.", "var(--danger)");
+    }
+
+    function resetar() {
+        tentativa = "";
+        bloqueado = false;
+        travarBotoes(false);
+        atualizarTela();
+        limparFeedback();
+    }
+
+    /* EVENTOS */
+    botoes.forEach((b) =>
+        b.addEventListener("click", () => adicionar(b.dataset.valor))
+    );
+
+    resetEl.addEventListener("click", resetar);
+
+    document.addEventListener("keydown", (e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+        if (e.key === "0" || e.key === "1") {
+            e.preventDefault();
+            adicionar(e.key);
+        } else if (e.key === "Backspace") {
+            e.preventDefault();
+            apagar();
+        } else if (e.key === "Escape") {
+            e.preventDefault();
+            resetar();
+        }
+    });
+
+    atualizarTela();
+})();
+</script>
 
 </body>
-
 </html>
-
